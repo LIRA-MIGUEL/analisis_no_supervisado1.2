@@ -19,7 +19,7 @@ def cargar_datos(path_csv='resenas_superman.csv'):
     data = data.dropna(subset=['rating', 'review'])
     data = data[data['review'].str.strip() != '']
     data['review'] = data['review'].str.lower()
-    data['sentimiento'] = data['rating'].apply(lambda r: 'positivo' if r >= 7 else 'neutral' if r >=5 else 'negativo')
+    data['sentimiento'] = data['rating'].apply(lambda r: 'positivo' if r >= 7 else 'neutral' if r >= 5 else 'negativo')
     return data
 
 def entrenar_modelos(data):
@@ -47,21 +47,22 @@ def predecir(texto, vectorizador, modelo_clasif, modelo_kmeans):
 
     print(f"Probabilidades predicción: {probs}")
 
-    # Lista de palabras negativas frecuentes para reforzar la decisión
-    palabras_negativas = ['mala', 'horrible', 'terrible', 'defecto', 'decepcionante', 'insuficiente', 'fallo', 'pésima', 'malo', 'miserable', 'insoportable']
+    # Umbral mínimo para considerar válida la predicción (puedes ajustar)
+    umbral_minimo = 0.3
 
-    tiene_negativas = any(palabra in texto_proc for palabra in palabras_negativas)
+    # Filtrar clases que tengan probabilidad mayor al umbral
+    clases_filtradas = [(clase, prob) for clase, prob in probs.items() if prob >= umbral_minimo]
 
-    # Nueva regla ajustada
-    if probs.get('negativo', 0) > 0.3 and (probs.get('negativo', 0) >= probs.get('neutral', 0) or tiene_negativas):
-        pred_sentimiento = 'negativo'
-    elif probs.get('neutral', 0) > 0.35:
-        pred_sentimiento = 'neutral'
-    else:
+    if not clases_filtradas:
+        # Si ninguna supera el umbral, tomar la clase con mayor probabilidad
         pred_sentimiento = clases[pred_proba.argmax()]
+    else:
+        # Si varias pasan el umbral, elegir la que tenga mayor probabilidad
+        pred_sentimiento = max(clases_filtradas, key=lambda x: x[1])[0]
 
     pred_cluster = modelo_kmeans.predict(X_new)[0]
     return pred_sentimiento, pred_cluster
+
 
 def guardar_reseña(path_csv, texto, rating, sentimiento_texto, sentimiento_rating, cluster):
     nueva_fila = pd.DataFrame({

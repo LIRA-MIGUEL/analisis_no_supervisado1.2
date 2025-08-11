@@ -30,3 +30,13 @@ rating,review,sentimiento,cluster
 2.0,muy mala pelicula,negativo,negativo,1
 6.0,una pelicula decente,neutral,neutral,1
 6.0,pelicula medio buena,neutral,neutral,1
+10.0,la mejor pelicula que eh visto en toda europa,neutral,positivo,1
+10.0,la mejor pelicula que eh visto en toda europa,neutral,positivo,1
+10.0,la mejor pelicula que eh visto en toda europa,neutral,positivo,1
+10.0,la mejor pelicula de toda españa,positivo,positivo,1
+7.0,una pelicula demasiado regular pero entretenida,neutral,positivo,1
+2.0,la peor pelicula del todo peru,neutral,negativo,1
+1.0,una muy mala pelicula,neutral,negativo,1
+10.0,la mejor pelicula que vi,positivo,positivo,1
+6.0,pelicula regular,neutral,neutral,1
+2.0,muy mala pelicula,neutral,negativo,1
