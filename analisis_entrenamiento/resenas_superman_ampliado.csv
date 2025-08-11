@@ -5,3 +5,28 @@ rating,review,sentimiento,cluster
 9.0,muy buena pelicula,positivo,2
 2.0,no me gusto la pelicula,positivo,2
 1.0,muy mala,positivo,2
+1.0,mala,positivo,2
+5.0,muy mala pelicula,positivo,2
+1.0,no me gusto por le falta algo,neutral,2
+2.0,muy mala pelicula,negativo,2
+10.0,no me gusto esta pelicula,positivo,2
+5.0,no me gusto,positivo,neutral,2
+9.0,muy buena pelicula pero no termino de convencerme,negativo,positivo,2
+9.0,muy buena pelicula,positivo,2
+3.0,no me gusto esta pelicula,positivo,2
+2.0,muy mala,positivo,2
+10.0,muy buena pelicula,positivo,positivo,1
+3.0,la verdad no me gusto esta medio meh,negativo,negativo,1
+4.0,esta medio buena pero estoy inconforme,positivo,negativo,1
+10.0,,negativo,positivo,1
+5.0,no es mala pero tampoco es buena,negativo,neutral,1
+6.0,no es lo que esperaba pero estoy satsifecho,negativo,neutral,1
+6.0,es una pelicula palomera,neutral,neutral,0
+1.0,muy mala pelicula,neutral,negativo,1
+2.0,nome gusto la peliucla,neutral,negativo,0
+6.0,fue una pelicula regular,neutral,neutral,1
+2.0,muy mala pelicula,neutral,negativo,1
+1.0,muy mala pelicula,neutral,negativo,1
+2.0,muy mala pelicula,negativo,negativo,1
+6.0,una pelicula decente,neutral,neutral,1
+6.0,pelicula medio buena,neutral,neutral,1

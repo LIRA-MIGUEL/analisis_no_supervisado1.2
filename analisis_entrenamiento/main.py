@@ -4,14 +4,13 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.cluster import KMeans
 from nltk.corpus import stopwords
 import nltk
+import os
 
-# Configuración NLTK y stopwords
 nltk_data_path = "nltk_data"
 nltk.data.path.append(nltk_data_path)
 nltk.download("stopwords", download_dir=nltk_data_path)
 
-# Usamos todas las stopwords oficiales sin modificaciones
-spanish_stopwords = list(stopwords.words("spanish"))  # <-- aquí la corrección clave
+spanish_stopwords = list(stopwords.words("spanish"))
 
 def cargar_datos(path_csv='resenas_superman.csv'):
     data = pd.read_csv(path_csv, encoding='utf-8')
@@ -24,10 +23,10 @@ def cargar_datos(path_csv='resenas_superman.csv'):
     return data
 
 def entrenar_modelos(data):
-    vectorizador = TfidfVectorizer(stop_words=spanish_stopwords, max_features=5000, ngram_range=(1,2))
+    vectorizador = TfidfVectorizer(stop_words=spanish_stopwords, max_features=5000, ngram_range=(1,3))
     X = vectorizador.fit_transform(data['review'])
-
     y = data['sentimiento']
+
     modelo_clasif = LogisticRegression(max_iter=1000, class_weight='balanced')
     modelo_clasif.fit(X, y)
 
@@ -42,16 +41,34 @@ def entrenar_modelos(data):
 def predecir(texto, vectorizador, modelo_clasif, modelo_kmeans):
     texto_proc = texto.lower()
     X_new = vectorizador.transform([texto_proc])
-    pred_sentimiento = modelo_clasif.predict(X_new)[0]
+    pred_proba = modelo_clasif.predict_proba(X_new)[0]
+    clases = modelo_clasif.classes_
+    probs = dict(zip(clases, pred_proba))
+
+    print(f"Probabilidades predicción: {probs}")
+
+    # Lista de palabras negativas frecuentes para reforzar la decisión
+    palabras_negativas = ['mala', 'horrible', 'terrible', 'defecto', 'decepcionante', 'insuficiente', 'fallo', 'pésima', 'malo', 'miserable', 'insoportable']
+
+    tiene_negativas = any(palabra in texto_proc for palabra in palabras_negativas)
+
+    # Nueva regla ajustada
+    if probs.get('negativo', 0) > 0.3 and (probs.get('negativo', 0) >= probs.get('neutral', 0) or tiene_negativas):
+        pred_sentimiento = 'negativo'
+    elif probs.get('neutral', 0) > 0.35:
+        pred_sentimiento = 'neutral'
+    else:
+        pred_sentimiento = clases[pred_proba.argmax()]
+
     pred_cluster = modelo_kmeans.predict(X_new)[0]
     return pred_sentimiento, pred_cluster
 
-def guardar_nueva_reseña(path_csv, texto, rating, sentimiento, cluster):
-    import os
+def guardar_reseña(path_csv, texto, rating, sentimiento_texto, sentimiento_rating, cluster):
     nueva_fila = pd.DataFrame({
         'rating': [rating],
         'review': [texto],
-        'sentimiento': [sentimiento],
+        'sentimiento_texto': [sentimiento_texto],
+        'sentimiento_rating': [sentimiento_rating],
         'cluster': [cluster]
     })
     if os.path.exists(path_csv):
@@ -59,42 +76,39 @@ def guardar_nueva_reseña(path_csv, texto, rating, sentimiento, cluster):
     else:
         nueva_fila.to_csv(path_csv, index=False)
 
-def menu_interactivo():
+if __name__ == "__main__":
+    print("Cargando datos y entrenando modelos...")
     data = cargar_datos()
     vectorizador, modelo_clasif, modelo_kmeans, data = entrenar_modelos(data)
-    dataset_path = 'resenas_superman_ampliado.csv'
+    print("Listo para usar.")
 
-    print("=== Análisis de Sentimientos y Clustering interactivo ===")
+    dataset_guardado = 'resenas_superman_ampliado.csv'
 
     while True:
-        print("\nOpciones:")
-        print("1. Ingresar nueva reseña")
-        print("2. Salir")
-        opcion = input("Elige una opción: ").strip()
-
+        opcion = input("\n1. Ingresar nueva reseña\n2. Salir\nElige una opción: ").strip()
         if opcion == '1':
             texto = input("Escribe la reseña: ").strip()
-            rating = input("Escribe el rating (numérico del 1 al 10): ").strip()
+            rating = input("Escribe el rating (1-10): ").strip()
             try:
                 rating_num = float(rating)
-                if rating_num < 1 or rating_num > 10:
+                if not (1 <= rating_num <= 10):
                     raise ValueError
-            except ValueError:
-                print("Rating inválido. Debe ser un número entre 1 y 10.")
+            except:
+                print("Rating inválido. Intenta de nuevo.")
                 continue
 
-            sentimiento, cluster = predecir(texto, vectorizador, modelo_clasif, modelo_kmeans)
-            print(f"Predicción de sentimiento: {sentimiento}")
-            print(f"Predicción de cluster: {cluster}")
+            sentimiento_rating = 'positivo' if rating_num >= 7 else 'neutral' if rating_num >= 5 else 'negativo'
+            sentimiento_texto, cluster = predecir(texto, vectorizador, modelo_clasif, modelo_kmeans)
 
-            guardar_nueva_reseña(dataset_path, texto, rating_num, sentimiento, cluster)
-            print(f"Reseña guardada en '{dataset_path}' para ampliar dataset.")
+            print(f"\nSentimiento por texto: {sentimiento_texto}")
+            print(f"Sentimiento por rating: {sentimiento_rating}")
+            print(f"Cluster asignado: {cluster}")
+
+            guardar_reseña(dataset_guardado, texto, rating_num, sentimiento_texto, sentimiento_rating, cluster)
+            print(f"Reseña guardada en '{dataset_guardado}'.")
 
         elif opcion == '2':
             print("Saliendo...")
             break
         else:
-            print("Opción no válida, intenta de nuevo.")
-
-if __name__ == "__main__":
-    menu_interactivo()
+            print("Opción inválida. Intenta de nuevo.")
