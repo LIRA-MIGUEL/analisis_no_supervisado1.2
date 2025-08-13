@@ -63,7 +63,6 @@ def predecir(texto, vectorizador, modelo_clasif, modelo_kmeans):
     pred_cluster = modelo_kmeans.predict(X_new)[0]
     return pred_sentimiento, pred_cluster
 
-
 def guardar_reseña(path_csv, texto, rating, sentimiento_texto, sentimiento_rating, cluster):
     nueva_fila = pd.DataFrame({
         'rating': [rating],
