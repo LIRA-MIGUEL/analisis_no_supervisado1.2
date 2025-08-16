@@ -37,12 +37,12 @@ model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 
 # Mostrar ejemplos de predicción
-print("📊 Ejemplos de predicciones:\n")
+print("Ejemplos de predicciones:\n")
 for i, (real, pred) in enumerate(zip(y_test[:10], y_pred[:10]), 1):
     print(f"{i:>2}. Real: {real:<9} | Predicho: {pred:<9}")
 
 # Precisión
-print(f"\n✅ Precisión del modelo: {accuracy_score(y_test, y_pred):.2%}\n")
+print(f"\n Precisión del modelo: {accuracy_score(y_test, y_pred):.2%}\n")
 
 # Reporte de clasificación
 print(classification_report(y_test, y_pred, zero_division=0))
@@ -61,7 +61,7 @@ plt.show()
 df["pred_sentimiento"] = model.predict(vectorizer.transform(df["review"]))
 
 # Mostrar todas las reseñas con clasificación real y predicha
-print("\n📌 Reseñas clasificadas:\n")
+print("\n Reseñas clasificadas:\n")
 for idx, row in df.iterrows():
     print(f"Reseña: {row['review']}")
     print(f"Rating: {row['rating']} → Real: {row['sentimiento']} | Predicho: {row['pred_sentimiento']}")
